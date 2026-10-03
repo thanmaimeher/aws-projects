@@ -215,7 +215,9 @@ An AMI is a template of the original instance's root EBS volume. When the image 
 
 ### 2. What would happen if `systemctl enable httpd` had not been run?
 
-_TODO: fill in after running the "break it on purpose" bonus._
+systemctl start httpd launches the service only in the current boot. It lives in memory and stops when the instance reboots. A web server needs to be available without manual action, so it must be enabled, which creates a symlink under /etc/systemd/system/multi-user.target.wants/. At boot, systemd starts as the first process, reads that directory, and starts every service that has a symlink there.
+
+An AMI captures the disk, not running processes. If httpd was only started on the original instance, the AMI contains the Apache package and index.html but no enable symlink. A clone launched from it boots with httpd installed but not running, and the browser shows a connection error until someone runs sudo systemctl enable --now httpd.
 
 ### 3. Why do the two instances have different public IPs?
 
