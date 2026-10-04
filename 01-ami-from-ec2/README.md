@@ -221,11 +221,17 @@ An AMI captures the disk, not running processes. If httpd was only started on th
 
 ### 3. Why do the two instances have different public IPs?
 
-_TODO_
+An AMI copies only the root volume's contents (OS, installed software, configuration, and data) plus launch metadata. It does not store any network identity. Each launch creates a new, independent instance with its own network interface, so AWS assigns it a new private IP and, if auto-assign is enabled, a new public IP from its pool. Two instances cannot share one public IP, so the original and the clone always differ.
+
+The hostname of the clone (ip-172-31-18-191) is derived from its private IP, which also differs from the original's. So the clone has the same software and data, but it is a separate machine with its own network identity.
+
+Public IPs are also not permanent: if an instance is stopped and started, it gets a new one unless an Elastic IP is attached.
 
 ### 4. Where is the page stored: instance store, EBS root volume, or S3?
 
-_TODO_
+The page is stored on the EBS root volume, at /var/www/html/index.html, which is Apache's default document root. This is why the AMI captured it: "Create image" snapshots the EBS volume, and the clone's volume is created from that snapshot.
+
+It is not on instance store, because instance store is ephemeral and is not included in an EBS-backed AMI. It is not in S3, because Apache serves files from the local file system, and nothing in this lab uploads to S3.
 
 ## Cleanup
 
